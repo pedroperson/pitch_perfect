@@ -1,0 +1,225 @@
+.soccer-field-container {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.soccer-field {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  background: linear-gradient(
+    to bottom,
+    #2d7d32 0%,
+    #388e3c 25%,
+    #43a047 50%,
+    #388e3c 75%,
+    #2d7d32 100%
+  );
+  border: 3px solid #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Field markings */
+.field-markings {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.center-line {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #fff;
+  transform: translateY(-50%);
+}
+
+.center-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120px;
+  height: 120px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.center-circle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background-color: #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.penalty-area {
+  position: absolute;
+  width: 180px;
+  height: 120px;
+  border: 2px solid #fff;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.penalty-area-top {
+  top: 0;
+  border-bottom: none;
+  border-top: none;
+}
+
+.penalty-area-bottom {
+  bottom: 0;
+  border-top: none;
+  border-bottom: none;
+}
+
+.goal-area {
+  position: absolute;
+  width: 80px;
+  height: 60px;
+  border: 2px solid #fff;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.goal-area-top {
+  top: 0;
+  border-bottom: none;
+  border-top: none;
+}
+
+.goal-area-bottom {
+  bottom: 0;
+  border-top: none;
+  border-bottom: none;
+}
+
+/* Player positions */
+.player-position {
+  position: absolute;
+  cursor: pointer;
+  user-select: none;
+  transform: translate(-50%, -50%);
+  transition: all 0.2s ease;
+}
+
+.player-position:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+}
+
+.player-position.selected {
+  transform: translate(-50%, -50%) scale(1.2);
+}
+
+.player-circle {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #1976d2, #1565c0);
+  border: 3px solid #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  margin-bottom: 8px;
+}
+
+.player-position.selected .player-circle {
+  background: linear-gradient(135deg, #f44336, #d32f2f);
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4);
+}
+
+.player-number {
+  color: #fff;
+  font-weight: bold;
+  font-size: 16px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.player-info {
+  text-align: center;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 6px;
+  padding: 4px 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  min-width: 80px;
+}
+
+.player-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: #1976d2;
+  margin-bottom: 2px;
+}
+
+.position-name {
+  font-size: 10px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .soccer-field {
+    height: 400px;
+  }
+
+  .player-circle {
+    width: 32px;
+    height: 32px;
+  }
+
+  .player-number {
+    font-size: 14px;
+  }
+
+  .player-name {
+    font-size: 10px;
+  }
+
+  .position-name {
+    font-size: 8px;
+  }
+
+  .center-circle {
+    width: 80px;
+    height: 80px;
+  }
+
+  .penalty-area {
+    width: 120px;
+    height: 80px;
+  }
+
+  .goal-area {
+    width: 60px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .soccer-field {
+    height: 300px;
+  }
+
+  .player-circle {
+    width: 28px;
+    height: 28px;
+  }
+
+  .player-number {
+    font-size: 12px;
+  }
+}
