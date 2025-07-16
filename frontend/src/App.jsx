@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import HomePage from './pages/HomePage';
+import AccountPage from './pages/AccountPage';
+import './App.css';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -73,7 +75,17 @@ function App() {
             path="/" 
             element={
               user ? (
-                <HomePage user={user} onLogout={handleLogout} />
+                <HomePage user={user} />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            } 
+          />
+          <Route 
+            path="/account" 
+            element={
+              user ? (
+                <AccountPage user={user} onLogout={handleLogout} />
               ) : (
                 <Navigate to="/login" replace />
               )

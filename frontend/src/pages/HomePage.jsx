@@ -1,118 +1,35 @@
-import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-const HomePage = ({ user, onLogout }) => {
-  const [newName, setNewName] = useState(user.name);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState('');
-
-  const handleUpdateName = async () => {
-    if (!newName.trim() || newName === user.name) {
-      setIsEditing(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setMessage('');
-
-    try {
-      const response = await fetch('http://localhost:3000/auth/edit-name', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ name: newName.trim() }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage('Name updated successfully!');
-        // Update the user object in the parent component
-        // This would ideally be handled by the parent, but for now we'll just show the message
-        setIsEditing(false);
-      } else {
-        setMessage(data.error || 'Failed to update name');
-      }
-    } catch (error) {
-      console.error('Update name error:', error);
-      setMessage('Network error. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleLogout = async () => {
-    await onLogout();
-  };
-
+const HomePage = ({ user }) => {
   return (
     <div className="home-container">
       <div className="home-card">
         <div className="header">
           <h1 className="welcome-title">Welcome to Football Manager!</h1>
-          <button onClick={handleLogout} className="logout-button">
-            Logout
-          </button>
+          <Link to="/account" className="account-link">
+            Account Settings
+          </Link>
         </div>
 
-        <div className="user-info">
-          <h2>Your Profile</h2>
+        <div className="welcome-content">
+          <p className="welcome-message">
+            Hello, <strong>{user.name}</strong>! Welcome to your football management dashboard.
+          </p>
           
-          <div className="info-group">
-            <label>Email:</label>
-            <span>{user.email}</span>
-          </div>
-
-          <div className="info-group">
-            <label>Name:</label>
-            {isEditing ? (
-              <div className="edit-name-container">
-                <input
-                  type="text"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  className="edit-name-input"
-                  placeholder="Enter new name"
-                />
-                <div className="edit-buttons">
-                  <button 
-                    onClick={handleUpdateName}
-                    disabled={isLoading}
-                    className="save-button"
-                  >
-                    {isLoading ? 'Saving...' : 'Save'}
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setIsEditing(false);
-                      setNewName(user.name);
-                    }}
-                    className="cancel-button"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="name-display">
-                <span>{user.name}</span>
-                <button 
-                  onClick={() => setIsEditing(true)}
-                  className="edit-button"
-                >
-                  Edit
-                </button>
-              </div>
-            )}
-          </div>
-
-          {message && (
-            <div className={`message ${message.includes('successfully') ? 'success' : 'error'}`}>
-              {message}
+          <div className="quick-actions">
+            <h3>Quick Actions</h3>
+            <div className="action-buttons">
+              <Link to="/account" className="action-button">
+                Manage Account
+              </Link>
+              <button className="action-button disabled">
+                Create Team (Coming Soon)
+              </button>
+              <button className="action-button disabled">
+                View Matches (Coming Soon)
+              </button>
             </div>
-          )}
+          </div>
         </div>
 
         <div className="coming-soon">

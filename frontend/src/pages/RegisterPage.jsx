@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import FormInput from '../components/FormInput';
+import '../auth.css';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
