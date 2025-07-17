@@ -67,6 +67,10 @@ function App() {
             <Link to='/formation' className='nav-link'>
               Formation Builder
             </Link>
+
+            <Link to="/account" className="nav-link">
+                Account
+              </Link>
           </div>
         </nav>
 

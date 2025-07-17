@@ -3,6 +3,10 @@
   box-sizing: border-box;
 }
 
+#root {
+  width: 100%;
+}
+
 .app {
   min-height: 100vh;
   font-family: Helvetica, sans-serif;
@@ -36,7 +40,7 @@
 
 .nav-links {
   display: flex;
-  gap: 24px;
+  gap: 0.5rem;
   align-items: center;
 }
 
@@ -44,7 +48,7 @@
   color: #666;
   text-decoration: none;
   font-weight: 500;
-  padding: 8px 16px;
+  padding: 0.5rem 0.5rem;
   border-radius: 8px;
   transition: all 0.2s ease;
 }

@@ -25,9 +25,9 @@ const HomePage = ({ user }) => {
               <button className="action-button disabled">
                 Create Team (Coming Soon)
               </button>
-              <button className="action-button disabled">
-                View Matches (Coming Soon)
-              </button>
+              <Link to='/formation' className='nav-link'>
+                Formation Builder
+              </Link>
             </div>
           </div>
         </div>
