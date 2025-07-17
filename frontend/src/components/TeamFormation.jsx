@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import SoccerField from './SoccerField';
 import PlayerEditor from './PlayerEditor';
 import FormationSelector from './FormationSelector';
+import SaveFormationModal from './SaveFormationModal';
 import { DEFAULT_FORMATIONS, FORMATION_TYPES } from '../data/formations';
 import './TeamFormation.css';
 
@@ -13,17 +14,33 @@ const TeamFormation = () => {
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [isEditingFormation, setIsEditingFormation] = useState(false);
   const [showPlayerEditor, setShowPlayerEditor] = useState(false);
+  const [savedFormations, setSavedFormations] = useState({});
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Load saved formations from localStorage on component mount
+  useEffect(() => {
+    const savedFormationsData = localStorage.getItem(
+      'pitchPerfectSavedFormations'
+    );
+    if (savedFormationsData) {
+      try {
+        setSavedFormations(JSON.parse(savedFormationsData));
+      } catch (error) {
+        console.error('Error loading saved formations:', error);
+      }
+    }
+  }, []);
 
   // Update formation when type changes
   useEffect(() => {
-    if (
-      selectedFormationType !== 'custom' &&
-      DEFAULT_FORMATIONS[selectedFormationType]
-    ) {
-      setCurrentFormation({ ...DEFAULT_FORMATIONS[selectedFormationType] });
+    const allFormations = { ...DEFAULT_FORMATIONS, ...savedFormations };
+    if (allFormations[selectedFormationType]) {
+      setCurrentFormation({ ...allFormations[selectedFormationType] });
       setSelectedPosition(null);
+      setHasUnsavedChanges(false);
     }
-  }, [selectedFormationType]);
+  }, [selectedFormationType, savedFormations]);
 
   const handleFormationChange = (formationType) => {
     setSelectedFormationType(formationType);
@@ -49,18 +66,12 @@ const TeamFormation = () => {
     if (selectedPosition?.id === playerId) {
       setSelectedPosition((prev) => ({ ...prev, ...updates }));
     }
+
+    setHasUnsavedChanges(true);
   };
 
   const handlePositionMove = (playerId, x, y) => {
     handlePlayerUpdate(playerId, { x, y });
-    // Mark as custom formation when positions are moved
-    if (selectedFormationType !== 'custom') {
-      setSelectedFormationType('custom');
-      setCurrentFormation((prev) => ({
-        ...prev,
-        name: 'Custom Formation',
-      }));
-    }
   };
 
   const toggleFormationEditing = () => {
@@ -69,26 +80,101 @@ const TeamFormation = () => {
     setShowPlayerEditor(false);
   };
 
-  const resetFormation = () => {
-    if (
-      selectedFormationType !== 'custom' &&
-      DEFAULT_FORMATIONS[selectedFormationType]
-    ) {
-      setCurrentFormation({ ...DEFAULT_FORMATIONS[selectedFormationType] });
-    }
-    setSelectedPosition(null);
-    setShowPlayerEditor(false);
+  const handleSaveFormation = () => {
+    setShowSaveModal(true);
   };
 
-  const createCustomFormation = () => {
-    setSelectedFormationType('custom');
-    setCurrentFormation({
-      name: 'Custom Formation',
-      positions: DEFAULT_FORMATIONS['4-3-3'].positions.map((pos) => ({
-        ...pos,
-      })),
+  const saveFormation = (formationName) => {
+    const formationKey = formationName.toLowerCase().replace(/\s+/g, '-');
+    const newFormation = {
+      ...currentFormation,
+      name: formationName,
+    };
+
+    const updatedSavedFormations = {
+      ...savedFormations,
+      [formationKey]: newFormation,
+    };
+
+    setSavedFormations(updatedSavedFormations);
+    localStorage.setItem(
+      'pitchPerfectSavedFormations',
+      JSON.stringify(updatedSavedFormations)
+    );
+
+    setHasUnsavedChanges(false);
+    setSelectedFormationType(formationKey);
+  };
+
+  const getExistingFormationNames = () => {
+    return Object.values(savedFormations).map((formation) =>
+      formation.name.toLowerCase()
+    );
+  };
+
+  const handlePlayerSwap = (playerId1, playerId2) => {
+    console.log(`Swapping player ${playerId1} with player ${playerId2}`);
+
+    setCurrentFormation((prev) => {
+      console.log('Previous formation:', prev);
+
+      // Create completely new positions array
+      const newPositions = prev.positions.map((pos) => ({ ...pos }));
+      const player1Index = newPositions.findIndex((p) => p.id === playerId1);
+      const player2Index = newPositions.findIndex((p) => p.id === playerId2);
+
+      console.log(
+        `Player 1 index: ${player1Index}, Player 2 index: ${player2Index}`
+      );
+
+      if (player1Index !== -1 && player2Index !== -1) {
+        const player1 = newPositions[player1Index];
+        const player2 = newPositions[player2Index];
+
+        console.log(
+          `Before swap - Player ${playerId1}: (${player1.x}, ${player1.y}), Player ${playerId2}: (${player2.x}, ${player2.y})`
+        );
+
+        // Store original positions
+        const temp = {
+          x: player1.x,
+          y: player1.y,
+        };
+
+        // Swap positions with completely new objects
+        newPositions[player1Index] = {
+          ...player1,
+          x: player2.x,
+          y: player2.y,
+        };
+
+        newPositions[player2Index] = {
+          ...player2,
+          x: temp.x,
+          y: temp.y,
+        };
+
+        console.log(
+          `After swap - Player ${playerId1}: (${newPositions[player1Index].x}, ${newPositions[player1Index].y}), Player ${playerId2}: (${newPositions[player2Index].x}, ${newPositions[player2Index].y})`
+        );
+      } else {
+        console.error('Could not find one or both players for swap');
+        return prev; // Return unchanged if players not found
+      }
+
+      const newFormation = {
+        ...prev,
+        positions: newPositions,
+        // Add timestamp to force re-render
+        lastUpdate: Date.now(),
+      };
+      console.log('New formation:', newFormation);
+      return newFormation;
     });
-    setIsEditingFormation(true);
+
+    setHasUnsavedChanges(true);
+    setSelectedPosition(null);
+    setShowPlayerEditor(false);
   };
 
   return (
@@ -102,7 +188,7 @@ const TeamFormation = () => {
         <FormationSelector
           selectedFormation={selectedFormationType}
           onFormationChange={handleFormationChange}
-          onCreateCustom={createCustomFormation}
+          savedFormations={savedFormations}
         />
 
         <div className='action-buttons'>
@@ -117,11 +203,15 @@ const TeamFormation = () => {
               : 'Edit Formation Positions'}
           </button>
 
-          {selectedFormationType !== 'custom' && (
-            <button className='btn btn-secondary' onClick={resetFormation}>
-              Reset Formation
-            </button>
-          )}
+          <button
+            className={`btn ${
+              hasUnsavedChanges ? 'btn-success' : 'btn-secondary'
+            }`}
+            onClick={handleSaveFormation}
+            disabled={!hasUnsavedChanges}
+          >
+            {hasUnsavedChanges ? 'Save Formation' : 'No Changes to Save'}
+          </button>
         </div>
       </div>
 
@@ -134,6 +224,30 @@ const TeamFormation = () => {
                 ? 'Drag players to reposition them on the field'
                 : 'Click on a player to edit their details'}
             </p>
+            {/* Debug info - remove this later */}
+            <details
+              style={{ fontSize: '12px', color: '#666', marginTop: '10px' }}
+            >
+              <summary>Debug: Current Positions</summary>
+              <pre
+                style={{
+                  fontSize: '10px',
+                  maxHeight: '100px',
+                  overflow: 'auto',
+                }}
+              >
+                {JSON.stringify(
+                  currentFormation.positions.map((p) => ({
+                    id: p.id,
+                    x: p.x,
+                    y: p.y,
+                    name: p.playerName,
+                  })),
+                  null,
+                  2
+                )}
+              </pre>
+            </details>
           </div>
 
           <SoccerField
@@ -149,9 +263,11 @@ const TeamFormation = () => {
           <div className='editor-section'>
             <PlayerEditor
               position={selectedPosition}
+              formation={currentFormation}
               onUpdate={(updates) =>
                 handlePlayerUpdate(selectedPosition.id, updates)
               }
+              onSwap={handlePlayerSwap}
               onClose={() => {
                 setShowPlayerEditor(false);
                 setSelectedPosition(null);
@@ -170,12 +286,19 @@ const TeamFormation = () => {
               <li>
                 Players will automatically be contained within field boundaries
               </li>
-              <li>Moving players will create a custom formation</li>
+              <li>Click "Save Formation" to save your custom formation</li>
               <li>Click "Exit Formation Edit" when you're done</li>
             </ul>
           </div>
         </div>
       )}
+
+      <SaveFormationModal
+        isOpen={showSaveModal}
+        onClose={() => setShowSaveModal(false)}
+        onSave={saveFormation}
+        existingNames={getExistingFormationNames()}
+      />
     </div>
   );
 };
