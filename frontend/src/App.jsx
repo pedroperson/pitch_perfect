@@ -8,6 +8,22 @@ import HomePage from './pages/HomePage';
 import AccountPage from './pages/AccountPage';
 import './App.css';
 
+// Protected Route Component
+const ProtectedRoute = ({ user, children }) => {
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
+// Public Route Component (redirects to home if already logged in)
+const PublicRoute = ({ user, children }) => {
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
+  return children;
+};
+
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -78,44 +94,43 @@ function App() {
           <Route 
             path="/" 
             element={
-              user ? (
+              <ProtectedRoute user={user}>
                 <HomePage user={user} />
-              ) : (
-                <Navigate to="/login" replace />
-              )
+              </ProtectedRoute>
             } 
           />
           <Route 
             path="/account" 
             element={
-              user ? (
+              <ProtectedRoute user={user}>
                 <AccountPage user={user} onLogout={handleLogout} />
-              ) : (
-                <Navigate to="/login" replace />
-              )
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/formation" 
+            element={
+              <ProtectedRoute user={user}>
+                <TeamFormation />
+              </ProtectedRoute>
             } 
           />
           <Route 
             path="/login" 
             element={
-              user ? (
-                <Navigate to="/" replace />
-              ) : (
+              <PublicRoute user={user}>
                 <LoginPage onLoginSuccess={setUser} />
-              )
+              </PublicRoute>
             } 
           />
           <Route 
             path="/register" 
             element={
-              user ? (
-                <Navigate to="/" replace />
-              ) : (
+              <PublicRoute user={user}>
                 <RegisterPage />
-              )
+              </PublicRoute>
             } 
           />
-          <Route path='/formation' element={<TeamFormation />} />
         </Routes>
       </div>
     </Router>

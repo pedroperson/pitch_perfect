@@ -3,6 +3,7 @@ import { JSONFile } from "lowdb/node";
 import crypto from "crypto";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,11 +16,21 @@ class UserRepository {
 
   async init() {
     const dbPath = path.join(__dirname, "../../data/users.json");
+    const dataDir = path.dirname(dbPath);
+
+    // Create data directory if it doesn't exist
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+      console.log(`Created data directory: ${dataDir}`);
+    }
+
     const adapter = new JSONFile(dbPath);
     this.db = new Low(adapter, { users: [] });
 
     await this.db.read();
     await this.db.write();
+
+    console.log(`Initialized users database: ${dbPath}`);
   }
 
   /**
